@@ -10,10 +10,10 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(
-      process.env.MONGO_URI || 'mongodb+srv://xxx:xxx@xxx.xxx.mongodb.net/xxx'
+      process.env.MONGO_URI || 'mongodb+srv://xxx:xxx@xxx.xxx.mongodb.net/xxx' // MongoDB bağlantı URI
     ),
     UsersModule,
-    AuthModule, // MongoDB bağlantı URI
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
