@@ -26,21 +26,21 @@ export class AuthService {
     return null;
   }
 
-  async getTokens(userId: string, email: string) {
+  async getTokens(userId: string, email: string, tokenVersion: number) {
     const jwtSecret = this.configService.get<string>('JWT_SECRET');
     const jwtRefreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
-
+  
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
-        { sub: userId, email },
+        { sub: userId, email, tokenVersion },
         { secret: jwtSecret, expiresIn: '2h' }, // Access token 2 saat
       ),
       this.jwtService.signAsync(
-        { sub: userId, email },
+        { sub: userId, email, tokenVersion },
         { secret: jwtRefreshSecret, expiresIn: '7d' }, // Refresh token 7 gün
       ),
     ]);
-
+  
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
@@ -48,8 +48,25 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const tokens = await this.getTokens(user._id.toString(), user.email);
-    await this.updateRefreshToken(user._id.toString(), tokens.refresh_token);
+    // ✅ tokenVersion'u artır
+    const updatedUser = await this.usersService.findByIdAndUpdate(user._id.toString(), {
+      tokenVersion: (user.tokenVersion || 0) + 1,
+    });
+  
+    if (!updatedUser) {
+      throw new UnauthorizedException('Kullanıcı bulunamadı.');
+    }
+  
+    // ✅ Yeni tokenları üret
+    const tokens = await this.getTokens(
+      updatedUser._id.toString(),
+      updatedUser.email,
+      updatedUser.tokenVersion,
+    );
+  
+    // ✅ Refresh token hashlenip kaydedilir
+    await this.updateRefreshToken(updatedUser._id.toString(), tokens.refresh_token);
+  
     return tokens;
   }
 
@@ -64,13 +81,13 @@ export class AuthService {
     }
 
     const user = await this.usersService.create(email, password);
-    return this.login(user);
+    return { message: 'Kullanıcı başarıyla oluşturuldu.' };
+    //return this.login(user);
   }
 
   async updateRefreshToken(userId: string, refreshToken: string) {
-    const hashedToken = await bcrypt.hash(refreshToken, 10); // 10 = saltRounds
     await this.usersService.findByIdAndUpdate(userId, {
-      refreshToken: hashedToken,
+      refreshToken: refreshToken,
     });
   }
 
@@ -80,18 +97,32 @@ export class AuthService {
       throw new UnauthorizedException('Kullanıcı bulunamadı veya refresh token yok.');
     }
   
-    const isMatch = await bcrypt.compare(refreshToken, user.refreshToken);
+
+    const isMatch = refreshToken === user.refreshToken;
     if (!isMatch) {
       throw new UnauthorizedException('Refresh token eşleşmiyor.');
     }
+    console.log("Is match");
+    console.log(isMatch);
   
-    const userObj = user.toObject();
-
-    // Token geçerliyse yeni tokenlar üret
-    const tokens = await this.getTokens(userObj._id.toString(), userObj.email);
+    // ✅ tokenVersion'u artır
+    const updatedUser = await this.usersService.findByIdAndUpdate(user._id.toString(), {
+      tokenVersion: (user.tokenVersion || 0) + 1,
+    });
   
-    // Yeni refresh token'ı hash'leyip güncelle
-    await this.updateRefreshToken(userObj._id.toString(), tokens.refresh_token);
+    if (!updatedUser) {
+      throw new UnauthorizedException('Kullanıcı bulunamadı.');
+    }
+  
+    // ✅ Yeni tokenlar üret
+    const tokens = await this.getTokens(
+      updatedUser._id.toString(),
+      updatedUser.email,
+      updatedUser.tokenVersion,
+    );
+  
+    // ✅ Refresh token'ı hashleyip güncelle
+    await this.updateRefreshToken(updatedUser._id.toString(), tokens.refresh_token);
   
     return tokens;
   }

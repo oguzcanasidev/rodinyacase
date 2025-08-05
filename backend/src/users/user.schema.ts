@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export type UserDocument = User & Document;
+export type UserDocument = User & Document & { _id: Types.ObjectId };
 
 @Schema({ timestamps: true }) // createdAt ve updatedAt otomatik eklenir
 export class User {
@@ -16,6 +16,9 @@ export class User {
 
   @Prop({ type: String, required: false, default: null })
   refreshToken: string | null;
+
+  @Prop({ type: Number, required: false, default: 0 })
+  tokenVersion: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
