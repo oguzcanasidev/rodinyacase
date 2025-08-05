@@ -16,7 +16,20 @@ export class UsersService {
     return this.userModel.findOne({ username }).exec();
   }
 
+  async findById(id: string): Promise<UserDocument | null> {
+    return this.userModel.findById(id).exec();
+  }
+
+  async findByIdAndUpdate(id: string, update: Partial<User>): Promise<UserDocument | null> {
+    return this.userModel.findByIdAndUpdate(id, update, { new: true }).exec();
+  }
+
   async create(email: string, password: string): Promise<User> {
+    const existing = await this.findByEmail(email);
+    if (existing) {
+      throw new Error('Email adresi zaten kullanılıyor.');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
   
     // Email'deki @ öncesini alıp username yapıyoruz
