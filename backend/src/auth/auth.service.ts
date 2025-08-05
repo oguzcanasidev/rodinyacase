@@ -128,7 +128,18 @@ export class AuthService {
   }
 
   async logout(userId: string) {
-    await this.usersService.findByIdAndUpdate(userId, { refreshToken: null });
+    // Kullanıcıyı bul
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Kullanıcı bulunamadı.');
+    }
+
+    // Refresh token'ı kaldır ve token versiyonunu artır
+    await this.usersService.findByIdAndUpdate(userId, {
+      refreshToken: null,
+      tokenVersion: (user.tokenVersion || 0) + 1,
+    });
+  
     return { message: 'Başarıyla çıkış yapıldı.' };
   }
 }
