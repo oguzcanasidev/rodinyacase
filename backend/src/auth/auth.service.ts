@@ -13,9 +13,14 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string) {
+    if (!email || !password) {
+      throw new UnauthorizedException('Email ve şifre alanları zorunludur.');
+    }
+
     const user = await this.usersService.findByEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user as any;
+      const userObject = user.toObject();
+      const { password, ...result } = userObject;
       return result;
     }
     return null;
@@ -49,10 +54,15 @@ export class AuthService {
   }
 
   async register(email: string, password: string) {
+    if (!email || !password) {
+      throw new UnauthorizedException('Email ve şifre alanları zorunludur.');
+    }
+
     const existingUser = await this.usersService.findByEmail(email);
     if (existingUser) {
       throw new UnauthorizedException('Email adresi zaten kullanılıyor.');
     }
+
     const user = await this.usersService.create(email, password);
     return this.login(user);
   }

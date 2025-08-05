@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -16,7 +16,7 @@ export class AuthController {
     // auth service gönderip validateUser ile kontrol ediyoruz
     const user = await this.authService.validateUser(body.email, body.password);
     if (!user) {
-      return { message: 'Hatalı kullanıcı adı veya şifre.' };
+      throw new UnauthorizedException('Hatalı kullanıcı adı veya şifre.');
     }
     return this.authService.login(user);
   }
