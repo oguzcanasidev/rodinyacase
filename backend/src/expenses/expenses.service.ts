@@ -8,18 +8,35 @@ export class ExpensesService {
   constructor(@InjectModel(Expense.name) private expenseModel: Model<Expense>) {}
 
   async create(userId: string, amount: number, category: string, description: string, date: Date): Promise<Expense> {
+    console.log('Creating expense with userId:', userId);
+    const userObjectId = new Types.ObjectId(userId);
+    console.log('Converted userId to ObjectId:', userObjectId);
+    
     const createdExpense = new this.expenseModel({
-      userId: new Types.ObjectId(userId),
+      userId: userObjectId,
       amount,
       category,
       description,
       date,
     });
-    return createdExpense.save();
+    
+    const savedExpense = await createdExpense.save();
+    console.log('Saved expense:', savedExpense);
+    return savedExpense;
   }
 
   async findAllByUser(userId: string): Promise<Expense[]> {
-    return this.expenseModel.find({ userId: userId }).exec();
+    console.log('Searching expenses for userId:', userId);
+    console.log('Type of userId:', typeof userId);
+    
+    // userId'yi ObjectId'ye çevirelim
+    const userObjectId = new Types.ObjectId(userId);
+    console.log('Converted ObjectId:', userObjectId);
+    
+    const expenses = await this.expenseModel.find({ userId: userObjectId }).exec();
+    console.log('Found expenses:', expenses);
+    
+    return expenses;
   }
 
   async findById(id: string): Promise<Expense | null> {
