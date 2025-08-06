@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './user.schema';
@@ -27,15 +27,25 @@ export class UsersService {
   async create(email: string, password: string): Promise<User> {
     const existing = await this.findByEmail(email);
     if (existing) {
-      throw new Error('Email adresi zaten kullanılıyor.');
+      throw new ConflictException('Email adresi zaten kullanılıyor.');
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-  
-    // Email'deki @ öncesini alıp username yapıyoruz
-    const username = email.split('@')[0];
-  
-    const newUser = new this.userModel({ email, username, password: hashedPassword });
+    const hashedPassword = await this.hashPassword(password);
+    const username = this.generateUsername(email);
+
+    const newUser = new this.userModel({ 
+      email, 
+      username, 
+      password: hashedPassword 
+    });
     return newUser.save();
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 10);
+  }
+
+  private generateUsername(email: string): string {
+    return email.split('@')[0];
   }
 }
