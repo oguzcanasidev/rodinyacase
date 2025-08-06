@@ -3,6 +3,7 @@ import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { UserDocument } from 'src/users/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -48,7 +49,7 @@ export class AuthService {
   }
 
   async login(user: any) {
-    // ✅ tokenVersion'u artır
+    // tokenVersion'u artır
     const updatedUser = await this.usersService.findByIdAndUpdate(user._id.toString(), {
       tokenVersion: (user.tokenVersion || 0) + 1,
     });
@@ -57,17 +58,23 @@ export class AuthService {
       throw new UnauthorizedException('Kullanıcı bulunamadı.');
     }
   
-    // ✅ Yeni tokenları üret
+    // Yeni tokenları üret
     const tokens = await this.getTokens(
       updatedUser._id.toString(),
       updatedUser.email,
       updatedUser.tokenVersion,
     );
   
-    // ✅ Refresh token hashlenip kaydedilir
+    // Refresh token hashlenip kaydedilir
     await this.updateRefreshToken(updatedUser._id.toString(), tokens.refresh_token);
   
-    return tokens;
+    // Kullanıcı bilgilerini token ile birlikte dön
+    const { password, refreshToken, ...userWithoutSensitiveInfo } = updatedUser.toObject();
+    return {
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+      user: userWithoutSensitiveInfo
+    };
   }
 
   async register(email: string, password: string) {
@@ -80,9 +87,10 @@ export class AuthService {
       throw new UnauthorizedException('Email adresi zaten kullanılıyor.');
     }
 
-    const user = await this.usersService.create(email, password);
-    return { message: 'Kullanıcı başarıyla oluşturuldu.' };
-    //return this.login(user);
+    const newUser = await this.usersService.create(email, password);
+    const userObject = (newUser as UserDocument).toObject();
+    const { password: pwd, refreshToken, ...userWithoutSensitiveInfo } = userObject;
+    return { user: userWithoutSensitiveInfo };
   }
 
   async updateRefreshToken(userId: string, refreshToken: string) {
@@ -114,14 +122,14 @@ export class AuthService {
       throw new UnauthorizedException('Kullanıcı bulunamadı.');
     }
   
-    // ✅ Yeni tokenlar üret
+    // Yeni tokenlar üret
     const tokens = await this.getTokens(
       updatedUser._id.toString(),
       updatedUser.email,
       updatedUser.tokenVersion,
     );
   
-    // ✅ Refresh token'ı hashleyip güncelle
+    // Refresh token'ı hashleyip güncelle
     await this.updateRefreshToken(updatedUser._id.toString(), tokens.refresh_token);
   
     return tokens;
