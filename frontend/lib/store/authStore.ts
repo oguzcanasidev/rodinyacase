@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import api from '../api/axios'
-import { setAuthToken, removeAuthToken } from '../utils'
+import { setAuthToken, removeAuthToken, getAuthToken } from '../utils'
 
 interface User {
   id: string
@@ -13,6 +13,7 @@ interface AuthState {
   isLoading: boolean
   error: string | null
   isAuthenticated: boolean
+  initAuth: () => Promise<void>
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string) => Promise<void>
   logout: () => void
@@ -78,5 +79,39 @@ export const useAuthStore = create<AuthState>((set) => ({
     })
   },
 
-  clearError: () => set({ error: null })
+  clearError: () => set({ error: null }),
+
+  initAuth: async () => {
+    try {
+      set({ isLoading: true })
+      
+      const token = getAuthToken()
+      if (!token) {
+        set({ 
+          user: null,
+          isAuthenticated: false,
+          isLoading: false
+        })
+        return
+      }
+
+      // Token varsa kullanıcı bilgilerini al
+      const response = await api.post('/auth/profile')
+      const user = response.data // profile endpoint direkt user döndürüyor
+
+      set({
+        user,
+        isAuthenticated: true,
+        isLoading: false
+      })
+    } catch (error) {
+      // Token geçersizse temizle
+      removeAuthToken()
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false
+      })
+    }
+  }
 }))
