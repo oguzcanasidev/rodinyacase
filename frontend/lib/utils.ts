@@ -18,8 +18,14 @@ export function formatError(error: unknown): string {
   return 'Bir hata oluştu'
 }
 
-export function setAuthToken(token: string) {
+export function setAuthToken(token: string, refreshToken?: string, userId?: string) {
   localStorage.setItem('token', token)
+  if (refreshToken) {
+    localStorage.setItem('refreshToken', refreshToken)
+  }
+  if (userId) {
+    localStorage.setItem('userId', userId)
+  }
 }
 
 export function getAuthToken(): string | null {
@@ -29,6 +35,8 @@ export function getAuthToken(): string | null {
 
 export function removeAuthToken() {
   localStorage.removeItem('token')
+  localStorage.removeItem('refreshToken')
+  localStorage.removeItem('userId')
 }
 
 export function formatCurrency(amount: number): string {

@@ -3,7 +3,7 @@ import api from '../api/axios'
 import { setAuthToken, removeAuthToken, getAuthToken } from '../utils'
 
 interface User {
-  id: string
+  _id: string
   email: string
   username: string
 }
@@ -14,7 +14,7 @@ interface AuthState {
   error: string | null
   isAuthenticated: boolean
   initAuth: () => Promise<void>
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string, rememberMe: boolean) => Promise<void>
   register: (email: string, password: string) => Promise<void>
   logout: () => void
   clearError: () => void
@@ -26,13 +26,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   error: null,
   isAuthenticated: false,
 
-  login: async (email: string, password: string) => {
+  login: async (email: string, password: string, rememberMe: boolean) => {
     try {
       set({ isLoading: true, error: null })
       const response = await api.post('/auth/login', { email, password })
-      const { accessToken, user } = response.data
-      setAuthToken(accessToken)
-      
+      const { accessToken, refreshToken, user } = response.data
+
+      if (rememberMe) {
+        setAuthToken(accessToken, refreshToken, user._id)
+      }else{
+        setAuthToken(accessToken)
+      }
+
       set({ 
         user,
         isAuthenticated: true,

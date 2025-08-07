@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input'
 
 const loginSchema = z.object({
   email: z.string().email('Geçerli bir email adresi giriniz'),
-  password: z.string().min(6, 'Şifre en az 6 karakter olmalıdır')
+  password: z.string().min(6, 'Şifre en az 6 karakter olmalıdır'),
+  rememberMe: z.boolean().default(false)
 })
 
 type LoginFormData = z.infer<typeof loginSchema>
@@ -24,7 +25,10 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema)
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      rememberMe: false
+    }
   })
 
   useEffect(() => {
@@ -39,7 +43,7 @@ export default function LoginPage() {
   }, [clearError])
 
   const onSubmit = async (data: LoginFormData) => {
-    await login(data.email, data.password)
+    await login(data.email, data.password, data.rememberMe)
   }
 
   return (
@@ -95,6 +99,20 @@ export default function LoginPage() {
                   error={errors.password?.message}
                   {...register('password')}
                 />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <input
+                  id="rememberMe"
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  {...register('rememberMe')}
+                />
+                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900">
+                  Beni Hatırla
+                </label>
               </div>
             </div>
 
