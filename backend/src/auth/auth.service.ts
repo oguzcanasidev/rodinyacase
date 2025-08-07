@@ -34,7 +34,7 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         { sub: userId, email, tokenVersion },
-        { secret: jwtSecret, expiresIn: '1m' }, // Access token 2 saat
+        { secret: jwtSecret, expiresIn: '2h' }, // Access token 2 saat
       ),
       this.jwtService.signAsync(
         { sub: userId, email, tokenVersion },
@@ -65,7 +65,7 @@ export class AuthService {
       updatedUser.tokenVersion,
     );
   
-    // Refresh token hashlenip kaydedilir
+    // Refresh token kaydedilir
     await this.updateRefreshToken(updatedUser._id.toString(), tokens.refresh_token);
   
     // Kullanıcı bilgilerini token ile birlikte dön
@@ -129,7 +129,7 @@ export class AuthService {
       updatedUser.tokenVersion,
     );
   
-    // Refresh token'ı hashleyip güncelle
+    // Refresh token'ı güncelle
     await this.updateRefreshToken(updatedUser._id.toString(), tokens.refresh_token);
   
     return tokens;
