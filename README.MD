@@ -7,20 +7,20 @@ Bu proje, kullanıcıların günlük harcamalarını takip edebilecekleri, kateg
 ### Giriş Sayfası
 ![Giriş Sayfası](frontend-gorselleri/1.png)
 
-### Kayıt Sayfası
-![Kayıt Sayfası](frontend-gorselleri/2.png)
-
-### Ana Sayfa - Dashboard
-![Ana Sayfa](frontend-gorselleri/3.png)
+### Dashboard
+![Dashboard Sayfası](frontend-gorselleri/2.png)
 
 ### Harcama Listesi ve Filtreleme
-![Harcama Listesi](frontend-gorselleri/4.png)
+![Harcama Listesi ve Filtreleme](frontend-gorselleri/3.png)
 
-### Harcama Ekleme Formu
-![Harcama Ekleme](frontend-gorselleri/5.png)
+### Harcama Ekleme/Düzenleme
+![Harcama Ekleme/Düzenleme](frontend-gorselleri/4.png)
 
-### Harcama Düzenleme Formu
-![Harcama Düzenleme](frontend-gorselleri/6.png)
+### CSV Çıktı
+![CSV Çıktı](frontend-gorselleri/5.png)
+
+### Harcama Filtreleme
+![Harcama Filtreleme](frontend-gorselleri/6.png)
 
 ## Teknolojiler
 
