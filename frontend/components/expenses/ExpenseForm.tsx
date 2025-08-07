@@ -1,4 +1,4 @@
-import { EXPENSE_CATEGORIES } from '@/lib/constants'
+import { EXPENSE_CATEGORIES, ExpenseCategory } from '@/lib/constants'
 import { Expense } from '@/lib/store/expenseStore'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -10,10 +10,11 @@ const expenseSchema = z.object({
     .transform((val) => Number(val))
     .refine((val) => !isNaN(val), 'Geçerli bir sayı giriniz')
     .refine((val) => val > 0, 'Tutar 0\'dan büyük olmalıdır'),
-  category: z.enum(EXPENSE_CATEGORIES, {
-    errorMap: () => ({ message: 'Geçerli bir kategori seçin' }),
-  }),
-  description: z.string(),
+  category: z.custom<ExpenseCategory>((val) => 
+    EXPENSE_CATEGORIES.includes(val as ExpenseCategory), 
+    'Geçerli bir kategori seçin'
+  ),
+  description: z.string().optional(),
   date: z.string(),
 })
 

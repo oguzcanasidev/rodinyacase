@@ -1,11 +1,13 @@
 import { create } from 'zustand'
 import api from '../api/axios'
 
+import { ExpenseCategory } from '../constants'
+
 export interface Expense {
   _id: string
   amount: number
-  category: string
-  description: string
+  category: ExpenseCategory
+  description?: string
   date: string
   userId: string
   createdAt: string
@@ -21,7 +23,7 @@ interface ExpenseState {
   weeklyTotal: number
   monthlyTotal: number
   topCategory: {
-    category: string
+    category: ExpenseCategory
     amount: number
   } | null
   
@@ -136,7 +138,7 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
     const categoryTotals = expenses.reduce((acc, exp) => {
       acc[exp.category] = (acc[exp.category] || 0) + exp.amount
       return acc
-    }, {} as Record<string, number>)
+    }, {} as Record<ExpenseCategory, number>)
 
     const topCategory = Object.entries(categoryTotals).length > 0
       ? {
@@ -151,7 +153,7 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
       totalExpenses,
       weeklyTotal,
       monthlyTotal,
-      topCategory
+      topCategory: topCategory as { category: ExpenseCategory, amount: number } | null
     })
   },
 
