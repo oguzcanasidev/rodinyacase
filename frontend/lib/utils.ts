@@ -27,3 +27,10 @@ export function getAuthToken(): string | null {
 export function removeAuthToken() {
   localStorage.removeItem('token')
 }
+
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('tr-TR', {
+    style: 'currency',
+    currency: 'TRY'
+  }).format(amount)
+}
