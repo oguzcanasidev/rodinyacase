@@ -26,16 +26,13 @@ export class ExpensesService {
   }
 
   async findAllByUser(userId: string): Promise<Expense[]> {
-    console.log('Searching expenses for userId:', userId);
-    console.log('Type of userId:', typeof userId);
-    
-    // userId'yi ObjectId'ye çevirelim
     const userObjectId = new Types.ObjectId(userId);
-    console.log('Converted ObjectId:', userObjectId);
     
-    const expenses = await this.expenseModel.find({ userId: userObjectId }).exec();
-    console.log('Found expenses:', expenses);
-    
+    const expenses = await this.expenseModel.find({ userId: userObjectId })
+      .sort({ date: -1 }) // En yeni harcamalar önce gelsin
+      .lean() // JSON'a dönüştürme performansı için
+      .exec();
+
     return expenses;
   }
 

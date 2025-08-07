@@ -110,10 +110,8 @@ export class AuthService {
     if (!isMatch) {
       throw new UnauthorizedException('Refresh token eşleşmiyor.');
     }
-    console.log("Is match");
-    console.log(isMatch);
-  
-    // ✅ tokenVersion'u artır
+
+    // tokenVersion'u artır
     const updatedUser = await this.usersService.findByIdAndUpdate(user._id.toString(), {
       tokenVersion: (user.tokenVersion || 0) + 1,
     });

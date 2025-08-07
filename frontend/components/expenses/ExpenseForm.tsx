@@ -38,7 +38,7 @@ export default function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseForm
           amount: expense.amount,
           category: expense.category,
           description: expense.description,
-          date: expense.date.split('T')[0], // YYYY-MM-DD formatına çevir
+          date: expense.date.toISOString().split('T')[0], // YYYY-MM-DD formatına çevir
         }
       : {
           date: new Date().toISOString().split('T')[0],

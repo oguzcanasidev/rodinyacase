@@ -8,7 +8,7 @@ export interface Expense {
   amount: number
   category: ExpenseCategory
   description?: string
-  date: string
+  date: Date
   userId: string
   createdAt: string
   updatedAt: string
@@ -117,22 +117,36 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
 
   calculateMetrics: () => {
     const { expenses } = get()
+    
+    // Bugünün tarihini al ve saat bilgisini sıfırla
     const now = new Date()
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+    now.setHours(0, 0, 0, 0)
+    
+    // Tarihleri hesapla
+    const oneWeekAgo = new Date(now)
+    oneWeekAgo.setDate(now.getDate() - 7)
+    
+    const oneMonthAgo = new Date(now)
+    oneMonthAgo.setDate(now.getDate() - 30)
 
     // Toplam harcama
     const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0)
 
     // Haftalık toplam
-    const weeklyTotal = expenses
-      .filter(exp => new Date(exp.date) >= oneWeekAgo)
-      .reduce((sum, exp) => sum + exp.amount, 0)
+    const weeklyExpenses = expenses.filter(exp => {
+      const expDate = exp.date instanceof Date ? exp.date : new Date(exp.date)
+      expDate.setHours(0, 0, 0, 0)
+      return expDate >= oneWeekAgo && expDate <= now
+    })
+    const weeklyTotal = weeklyExpenses.reduce((sum, exp) => sum + exp.amount, 0)
 
     // Aylık toplam
-    const monthlyTotal = expenses
-      .filter(exp => new Date(exp.date) >= oneMonthAgo)
-      .reduce((sum, exp) => sum + exp.amount, 0)
+    const monthlyExpenses = expenses.filter(exp => {
+      const expDate = exp.date instanceof Date ? exp.date : new Date(exp.date)
+      expDate.setHours(0, 0, 0, 0)
+      return expDate >= oneMonthAgo && expDate <= now
+    })
+    const monthlyTotal = monthlyExpenses.reduce((sum, exp) => sum + exp.amount, 0)
 
     // En çok harcama yapılan kategori
     const categoryTotals = expenses.reduce((acc, exp) => {
