@@ -140,7 +140,7 @@ export default function ExpenseList({ expenses, onEdit, onDelete }: ExpenseListP
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 gap-2">
         <div className="md:hidden">
           <button
             type="button"
