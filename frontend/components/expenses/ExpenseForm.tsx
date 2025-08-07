@@ -35,10 +35,12 @@ export default function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseForm
     resolver: zodResolver(expenseSchema),
     defaultValues: expense
       ? {
-          amount: expense.amount,
+          amount: expense.amount.toString(),
           category: expense.category,
           description: expense.description,
-          date: expense.date.toISOString().split('T')[0], // YYYY-MM-DD formatına çevir
+          date: typeof expense.date === 'string' 
+            ? expense.date.split('T')[0] 
+            : new Date(expense.date).toISOString().split('T')[0], // YYYY-MM-DD formatına çevir
         }
       : {
           date: new Date().toISOString().split('T')[0],
